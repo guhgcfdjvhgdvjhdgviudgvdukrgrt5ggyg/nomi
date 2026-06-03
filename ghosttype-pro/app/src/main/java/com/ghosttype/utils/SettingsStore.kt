@@ -92,6 +92,7 @@ object SettingsStore {
     const val KEY_POINTER_MULTI_CLICK = "pointer_multi_click"  // when true, pointer clicks multiple times per send
     const val KEY_POINTER_SIZE_DP = "pointer_size_dp"       // dot diameter in dp (default 28)
     const val KEY_POINTER_CLICK_DELAY_MS = "pointer_click_delay_ms" // extra wait (ms) before pointer fires click (default 0)
+    const val KEY_POINTER_AUTO_CLICK_INTERVAL_MS = "pointer_auto_click_interval_ms" // auto-click interval in ms (default 1000)
 
     const val KEY_UI_THEME = "ui_theme"  // "dark" or "light"
 

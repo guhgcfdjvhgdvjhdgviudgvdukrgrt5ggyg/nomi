@@ -18,25 +18,43 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.ghosttype.utils.SettingsStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Draws a small orange floating dot overlay that the user can drag over the SEND button
  * of any chat app. The position is saved to SharedPreferences. AutoTypeEngine then uses
  * AccessibilityService.dispatchGesture() to "tap" that exact (x,y) after each typed line.
  *
+ * AUTO-CLICK MODE:
+ *   When the service starts (pointer is ON), a coroutine loop fires a gesture click at
+ *   the saved (x,y) every [KEY_POINTER_AUTO_CLICK_INTERVAL_MS] milliseconds (default 1 s).
+ *   The dot hides itself briefly before each click so the gesture lands on the app under
+ *   it, then reappears. Stop the service to stop auto-clicking.
+ *
  * - When LOCKED: dot is non-touchable (pointer events pass through to the app underneath)
  *   so it does not interfere with normal use.
- * - When UNLOCKED: dot is draggable, on each ACTION_UP its (x,y) is persisted.
+ * - When UNLOCKED: dot is draggable; on each ACTION_UP its (x,y) is persisted.
  *
  * Requires SYSTEM_ALERT_WINDOW (android.permission.SYSTEM_ALERT_WINDOW) — must be granted
  * by user via Settings.canDrawOverlays() flow.
+ * Requires GhostType Pro or GhostType Pointer accessibility service for gesture dispatch.
  */
 class FloatingPointerService : Service() {
 
     private var wm: WindowManager? = null
     private var dot: View? = null
     private var params: WindowManager.LayoutParams? = null
-    private var dotSizePx: Int = 0   // cached so coordinate math stays consistent
+    private var dotSizePx: Int = 0
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var autoClickJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -44,9 +62,12 @@ class FloatingPointerService : Service() {
         super.onCreate()
         instance = this
         showOverlay()
+        startAutoClick()
     }
 
     override fun onDestroy() {
+        stopAutoClick()
+        scope.cancel()
         hideOverlay()
         if (instance === this) instance = null
         super.onDestroy()
@@ -58,9 +79,52 @@ class FloatingPointerService : Service() {
             ACTION_UNLOCK  -> setLocked(false)
             ACTION_REFRESH -> applyLockedFlag()
             ACTION_RESIZE  -> applySize()
+            ACTION_AUTO_CLICK_START -> startAutoClick()
+            ACTION_AUTO_CLICK_STOP  -> stopAutoClick()
         }
         return START_STICKY
     }
+
+    // ─── Auto-click loop ─────────────────────────────────────────────────────
+
+    private fun startAutoClick() {
+        autoClickJob?.cancel()
+        autoClickJob = scope.launch(Dispatchers.IO) {
+            while (isActive) {
+                val prefs = SettingsStore.prefs(this@FloatingPointerService)
+                val intervalMs = prefs.getLong(
+                    SettingsStore.KEY_POINTER_AUTO_CLICK_INTERVAL_MS, 1000L
+                ).coerceIn(200L, 60_000L)
+
+                delay(intervalMs)
+                if (!isActive) break
+
+                val cx = prefs.getInt(SettingsStore.KEY_POINTER_X, -1)
+                val cy = prefs.getInt(SettingsStore.KEY_POINTER_Y, -1)
+                if (cx < 0 || cy < 0) continue  // position not set yet
+
+                // Hide dot so the gesture lands on the app below, not on us.
+                mainHandler.post { temporarilyHideForClick(900L) }
+                // Wait for the dot to be removed from WindowManager before clicking.
+                delay(700L)
+
+                // Dispatch gesture via whichever accessibility service is connected.
+                val clicked = GhostTypeAccessibilityService.instance?.clickAt(cx.toFloat(), cy.toFloat())
+                    ?: GhostTypePointerService.instance?.clickAt(cx.toFloat(), cy.toFloat())
+                    ?: false
+
+                // If neither service is connected, wait a bit longer before retrying.
+                if (!clicked) delay(2000L)
+            }
+        }
+    }
+
+    private fun stopAutoClick() {
+        autoClickJob?.cancel()
+        autoClickJob = null
+    }
+
+    // ─── Overlay ─────────────────────────────────────────────────────────────
 
     private fun currentSizeDp(): Int =
         SettingsStore.prefs(this).getInt(SettingsStore.KEY_POINTER_SIZE_DP, 28).coerceIn(16, 72)
@@ -71,7 +135,7 @@ class FloatingPointerService : Service() {
 
         val sizeDp = currentSizeDp()
         val sizePx = dp(sizeDp)
-        dotSizePx = sizePx                     // cache for coordinate math
+        dotSizePx = sizePx
         val halfPx = sizePx / 2
 
         val container = FrameLayout(this)
@@ -100,8 +164,6 @@ class FloatingPointerService : Service() {
         }
 
         val prefs = SettingsStore.prefs(this)
-        // Stored values are the CENTER of the dot (screen coordinates).
-        // params.x / params.y are the TOP-LEFT corner, so subtract half.
         val storedCx = prefs.getInt(SettingsStore.KEY_POINTER_X, -1)
         val storedCy = prefs.getInt(SettingsStore.KEY_POINTER_Y, -1)
         val locked = prefs.getBoolean(SettingsStore.KEY_POINTER_LOCKED, false)
@@ -113,12 +175,10 @@ class FloatingPointerService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            // Convert stored center → top-left corner for WindowManager
             x = if (storedCx >= 0) (storedCx - halfPx).coerceAtLeast(0) else 200
             y = if (storedCy >= 0) (storedCy - halfPx).coerceAtLeast(0) else 800
         }
 
-        // Drag handler (only effective when not locked)
         var downX = 0
         var downY = 0
         var touchX = 0f
@@ -139,7 +199,6 @@ class FloatingPointerService : Service() {
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    // Save the CENTER of the dot as the click target coordinate
                     SettingsStore.prefs(this).edit()
                         .putInt(SettingsStore.KEY_POINTER_X, p.x + half)
                         .putInt(SettingsStore.KEY_POINTER_Y, p.y + half)
@@ -153,7 +212,7 @@ class FloatingPointerService : Service() {
         try {
             wm?.addView(container, params)
             dot = container
-        } catch (_: Throwable) { /* overlay permission missing */ }
+        } catch (_: Throwable) {}
     }
 
     private fun currentFlags(locked: Boolean): Int {
@@ -173,38 +232,21 @@ class FloatingPointerService : Service() {
     @Volatile private var hidingForClick = false
 
     /**
-     * Fully detach the dot from the window stack for [durationMs] and then
-     * re-attach it. Called by AutoTypeEngine right before it dispatches its
-     * accessibility tap.
-     *
-     * Why removal (and not just FLAG_NOT_TOUCHABLE):
-     *   On Android 9+ the system can still route AccessibilityService
-     *   `dispatchGesture()` taps to TYPE_APPLICATION_OVERLAY windows even
-     *   when those windows are flagged FLAG_NOT_TOUCHABLE. Result: the tap
-     *   lands on (or is consumed by) our floating dot instead of the SEND
-     *   button under it, and "auto-type line khatm hone ke baad pointer
-     *   click kaam nahi krta" — exactly the bug the user reported.
-     *
-     *   Removing the view from WindowManager guarantees no overlay is in
-     *   the way during the click. We re-add it ~[durationMs] later in the
-     *   same configuration (locked/unlocked, position, etc.).
+     * Fully detach the dot from the window stack for [durationMs] then re-attach.
+     * Called by both AutoTypeEngine and the auto-click loop before dispatching a gesture.
+     * Removal (not just FLAG_NOT_TOUCHABLE) is required because on Android 9+ the
+     * system can still route accessibility gestures to overlay windows.
      */
     fun temporarilyHideForClick(durationMs: Long = 600L) {
-        // If already hiding, cancel the pending re-add and force a fresh hide
-        // cycle. Previously `return` here caused the dot to stay visible →
-        // accessibility gesture landed on the dot instead of the send button.
         val v = dot ?: return
         val p = params ?: return
 
         hidingForClick = true
-        // Remove any pending re-add callbacks before scheduling new ones
         mainHandler.removeCallbacksAndMessages(HIDE_TOKEN)
 
-        // removeView MUST run on the main thread (WindowManager requirement)
         mainHandler.post {
             try { wm?.removeView(v) } catch (_: Throwable) {}
         }
-        // Re-add after durationMs and clear the flag
         mainHandler.postAtTime({
             try {
                 wm?.addView(v, p)
@@ -229,23 +271,19 @@ class FloatingPointerService : Service() {
         runCatching { wm?.updateViewLayout(v, p) }
     }
 
-    /** Rebuild the dot at the new size saved in SharedPreferences. */
     private fun applySize() {
         val v = dot ?: return
         val p = params ?: return
         val sizeDp = currentSizeDp()
         val sizePx = dp(sizeDp)
-        dotSizePx = sizePx                     // keep cache in sync
-        // Resize the WindowManager layout params
+        dotSizePx = sizePx
         p.width  = sizePx
         p.height = sizePx
         runCatching { wm?.updateViewLayout(v, p) }
-        // Resize the inner view and its children
         v.layoutParams = v.layoutParams?.also {
             it.width  = sizePx
             it.height = sizePx
         }
-        // Update text size of the inner TextView
         (v as? FrameLayout)?.getChildAt(0)?.let { child ->
             (child as? TextView)?.apply {
                 textSize = sizeDp * 0.75f
@@ -266,12 +304,14 @@ class FloatingPointerService : Service() {
     ).toInt()
 
     companion object {
-        private val HIDE_TOKEN = Any()   // tag for pending re-add runnables
+        private val HIDE_TOKEN = Any()
 
-        const val ACTION_LOCK    = "com.ghosttype.pointer.LOCK"
-        const val ACTION_UNLOCK  = "com.ghosttype.pointer.UNLOCK"
-        const val ACTION_REFRESH = "com.ghosttype.pointer.REFRESH"
-        const val ACTION_RESIZE  = "com.ghosttype.pointer.RESIZE"
+        const val ACTION_LOCK              = "com.ghosttype.pointer.LOCK"
+        const val ACTION_UNLOCK            = "com.ghosttype.pointer.UNLOCK"
+        const val ACTION_REFRESH           = "com.ghosttype.pointer.REFRESH"
+        const val ACTION_RESIZE            = "com.ghosttype.pointer.RESIZE"
+        const val ACTION_AUTO_CLICK_START  = "com.ghosttype.pointer.AUTO_CLICK_START"
+        const val ACTION_AUTO_CLICK_STOP   = "com.ghosttype.pointer.AUTO_CLICK_STOP"
 
         @Volatile var instance: FloatingPointerService? = null
 
@@ -291,6 +331,14 @@ class FloatingPointerService : Service() {
         }
         fun resize(ctx: Context) {
             val i = Intent(ctx, FloatingPointerService::class.java).setAction(ACTION_RESIZE)
+            ctx.startService(i)
+        }
+        fun startAutoClick(ctx: Context) {
+            val i = Intent(ctx, FloatingPointerService::class.java).setAction(ACTION_AUTO_CLICK_START)
+            ctx.startService(i)
+        }
+        fun stopAutoClick(ctx: Context) {
+            val i = Intent(ctx, FloatingPointerService::class.java).setAction(ACTION_AUTO_CLICK_STOP)
             ctx.startService(i)
         }
 
