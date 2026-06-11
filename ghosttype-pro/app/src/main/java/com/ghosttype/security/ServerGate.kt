@@ -20,7 +20,7 @@ internal object ServerGate {
     /** POST /verify — server batata hai app allowed hai ya nahi */
     fun verify(ctx: Context): Boolean {
         return try {
-            val workerUrl = Obf.decode(ObfConstants.SERVER_GATE_URL)
+            val workerUrl = Obf.decode(ctx, ObfConstants.SERVER_GATE_URL)
             if (workerUrl.isEmpty()) return false
             val signature = Obf.currentSigningSha(ctx)
             val deviceId = DeviceId.get(ctx)
