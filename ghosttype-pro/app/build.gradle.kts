@@ -95,22 +95,35 @@ val generateObfConstants = tasks.register("generateObfConstants") {
 
     doLast {
         val pkgName = "com.ghosttype"
+        if (!secretsFile.exists()) {
+            throw GradleException("secrets.properties not found at $secretsFile — copy secrets.properties.example and fill in the values")
+        }
         val secrets = Properties().apply {
-            if (secretsFile.exists()) load(secretsFile.inputStream())
+            load(secretsFile.inputStream())
+        }
+        val requiredKeys = listOf(
+            "APPROVAL_URL", "CRASH_URL", "UPDATE_URL",
+            "WHATSAPP_NUMBER", "OWNER_NAME", "OWNER_TEAM",
+            "INSTAGRAM_URL", "WA_CHANNEL_URL", "WA_COMMUNITY_URL",
+            "TELEGRAM_URL", "LICENSE_LINE", "SPACE_LABEL"
+        )
+        val missing = requiredKeys.filter { secrets.getProperty(it).isNullOrBlank() }
+        if (missing.isNotEmpty()) {
+            throw GradleException("Missing required secrets in secrets.properties: $missing")
         }
         val plaintexts = linkedMapOf(
-            "APPROVAL_URL"     to (secrets.getProperty("APPROVAL_URL")     ?: "https://pastebin.com/raw/xBST8TUg"),
-            "CRASH_URL"        to (secrets.getProperty("CRASH_URL")        ?: "https://pastebin.com/raw/JUMUXdAb"),
-            "UPDATE_URL"       to (secrets.getProperty("UPDATE_URL")       ?: "https://pastebin.com/raw/C4gP2XFE"),
-            "WHATSAPP_NUMBER"  to (secrets.getProperty("WHATSAPP_NUMBER")  ?: "923017787729"),
-            "OWNER_NAME"       to (secrets.getProperty("OWNER_NAME")       ?: "CHAND"),
-            "OWNER_TEAM"       to (secrets.getProperty("OWNER_TEAM")       ?: "ATF Team"),
-            "INSTAGRAM_URL"    to (secrets.getProperty("INSTAGRAM_URL")    ?: "https://www.instagram.com/chand.tricker?igsh=c2dhbHFyZXdrZmpp"),
-            "WA_CHANNEL_URL"   to (secrets.getProperty("WA_CHANNEL_URL")   ?: "https://whatsapp.com/channel/0029VaZrEGYIN9ih4PxcFQ33"),
-            "WA_COMMUNITY_URL" to (secrets.getProperty("WA_COMMUNITY_URL") ?: "https://chat.whatsapp.com/HBBWmgTmpNl7OvG2MCpQtR?mode=gi_t"),
-            "TELEGRAM_URL"     to (secrets.getProperty("TELEGRAM_URL")     ?: "https://t.me/Chandtrickers"),
-            "LICENSE_LINE"     to (secrets.getProperty("LICENSE_LINE")     ?: "CHAND · ATF Team. All rights reserved."),
-            "SPACE_LABEL"      to (secrets.getProperty("SPACE_LABEL")      ?: "CHAND TRICKER")
+            "APPROVAL_URL"     to secrets.getProperty("APPROVAL_URL"),
+            "CRASH_URL"        to secrets.getProperty("CRASH_URL"),
+            "UPDATE_URL"       to secrets.getProperty("UPDATE_URL"),
+            "WHATSAPP_NUMBER"  to secrets.getProperty("WHATSAPP_NUMBER"),
+            "OWNER_NAME"       to secrets.getProperty("OWNER_NAME"),
+            "OWNER_TEAM"       to secrets.getProperty("OWNER_TEAM"),
+            "INSTAGRAM_URL"    to secrets.getProperty("INSTAGRAM_URL"),
+            "WA_CHANNEL_URL"   to secrets.getProperty("WA_CHANNEL_URL"),
+            "WA_COMMUNITY_URL" to secrets.getProperty("WA_COMMUNITY_URL"),
+            "TELEGRAM_URL"     to secrets.getProperty("TELEGRAM_URL"),
+            "LICENSE_LINE"     to secrets.getProperty("LICENSE_LINE"),
+            "SPACE_LABEL"      to secrets.getProperty("SPACE_LABEL")
         )
 
         val sha: String

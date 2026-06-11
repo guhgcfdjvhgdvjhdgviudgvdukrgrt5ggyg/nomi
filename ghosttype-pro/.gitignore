@@ -18,3 +18,4 @@ local.properties
 keystore/flexboard-release.jks
 keystore/flexboard-release.jks.base64.txt
 keystore.properties
+secrets.properties

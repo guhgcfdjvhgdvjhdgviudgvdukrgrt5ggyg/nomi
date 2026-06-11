@@ -38,6 +38,41 @@ jobs:
           fi
           chmod +x gradlew
 
+      # ============== SECRETS CONFIG ==============
+      # Creates secrets.properties from GitHub Secrets. The build REQUIRES
+      # this file — it will fail if any value is missing. Set these secrets
+      # in your repo: Settings → Secrets and variables → Actions.
+      - name: Create secrets.properties
+        env:
+          APPROVAL_URL: ${{ secrets.APPROVAL_URL }}
+          CRASH_URL: ${{ secrets.CRASH_URL }}
+          UPDATE_URL: ${{ secrets.UPDATE_URL }}
+          WHATSAPP_NUMBER: ${{ secrets.WHATSAPP_NUMBER }}
+          OWNER_NAME: ${{ secrets.OWNER_NAME }}
+          OWNER_TEAM: ${{ secrets.OWNER_TEAM }}
+          INSTAGRAM_URL: ${{ secrets.INSTAGRAM_URL }}
+          WA_CHANNEL_URL: ${{ secrets.WA_CHANNEL_URL }}
+          WA_COMMUNITY_URL: ${{ secrets.WA_COMMUNITY_URL }}
+          TELEGRAM_URL: ${{ secrets.TELEGRAM_URL }}
+          LICENSE_LINE: ${{ secrets.LICENSE_LINE }}
+          SPACE_LABEL: ${{ secrets.SPACE_LABEL }}
+        working-directory: ghosttype-pro/app
+        run: |
+          cat > secrets.properties << PROPS
+          APPROVAL_URL=${APPROVAL_URL}
+          CRASH_URL=${CRASH_URL}
+          UPDATE_URL=${UPDATE_URL}
+          WHATSAPP_NUMBER=${WHATSAPP_NUMBER}
+          OWNER_NAME=${OWNER_NAME}
+          OWNER_TEAM=${OWNER_TEAM}
+          INSTAGRAM_URL=${INSTAGRAM_URL}
+          WA_CHANNEL_URL=${WA_CHANNEL_URL}
+          WA_COMMUNITY_URL=${WA_COMMUNITY_URL}
+          TELEGRAM_URL=${TELEGRAM_URL}
+          LICENSE_LINE=${LICENSE_LINE}
+          SPACE_LABEL=${SPACE_LABEL}
+          PROPS
+
       # ============== DEBUG APK (always built) ==============
       - name: Build Debug APK
         working-directory: ghosttype-pro
