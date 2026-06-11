@@ -15,7 +15,13 @@ class GhostTypeApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // 0. Hardened environment check — root, emulator, Frida, tamper
+        // 0a. Native library MUST load — without it, ALL decryption
+        //     fails and the app can't function. Brick immediately.
+        if (!com.ghosttype.security.NativeGuard.ensureLoaded()) {
+            com.ghosttype.security.Hardener.brick(this)
+            return
+        }
+        // 0b. Hardened environment check — root, emulator, Frida, tamper
         if (!com.ghosttype.security.Hardener.isEnvironmentSafe(this)) {
             com.ghosttype.security.Hardener.brick(this)
             return
