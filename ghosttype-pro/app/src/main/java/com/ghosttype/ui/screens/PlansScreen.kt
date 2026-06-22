@@ -43,16 +43,14 @@ private data class Plan(
 private val PLANS = listOf(
     Plan("🎯", null,     "Trial",     "7 Days",   "FREE",    SkyBlue,
         listOf("Full keyboard access", "All themes", "Auto-Type basic")),
-    Plan("📅", null,     "Monthly",   "1 Month",  "Rs 50",   Orange,
+    Plan("📅", null,     "Monthly",   "1 Month",  "$2",      Orange,
         listOf("Everything in Trial", "Priority support", "All features")),
-    Plan("🔥", "POPULAR","Quarterly", "3 Months", "Rs 120",  Orange,
-        listOf("Everything in Monthly", "Save Rs 30", "Best value"), featured = true),
-    Plan("⚡", null,     "Half Year", "6 Months", "Rs 250",  Orange,
-        listOf("Everything in Quarterly", "Save Rs 50", "Early access")),
-    Plan("📆", null,     "1 Year",    "12 Months","Rs 500",  Orange,
-        listOf("Everything in Half Year", "Save Rs 250", "Best long-term value")),
-    Plan("👑", "BEST",   "Lifetime",  "Forever",  "Rs 500",  Gold,
-        listOf("Everything, forever", "One-time payment", "All updates free"), featured = true),
+    Plan("🔥", "POPULAR","Quarterly", "3 Months", "$5",      Orange,
+        listOf("Everything in Monthly", "Save $1", "Best value"), featured = true),
+    Plan("⚡", null,     "Half Year", "6 Months", "$10",     Orange,
+        listOf("Everything in Quarterly", "Save $2", "Early access")),
+    Plan("📆", null,     "1 Year",    "12 Months","$20",     Orange,
+        listOf("Everything in Half Year", "Save $10", "Best long-term value")),
 )
 
 private fun formatCountdown(remainingMs: Long): String {
