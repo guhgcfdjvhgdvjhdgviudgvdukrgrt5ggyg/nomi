@@ -21,9 +21,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontFamily
+import com.ghosttype.security.ApprovalGate
 import com.ghosttype.security.DeviceId
 import com.ghosttype.utils.SettingsStore
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val Orange  = Color(0xFFFF8C00)
 private val Gold    = Color(0xFFFFD700)
@@ -79,6 +81,15 @@ fun PlansScreen() {
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    // Fetch fresh approval state from pastebin every time Plans screen opens.
+    // This runs independently of the background worker so the plan shows up
+    // immediately without waiting for the 15-min periodic window.
+    var checking by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        runCatching { ApprovalGate.evaluate(ctx, force = true) }
+        checking = false
     }
 
     if (tick > -1) {}  // force recomposition when prefs change
@@ -302,7 +313,6 @@ fun PlansScreen() {
                 }
             }
         } else {
-            // No plan selected yet
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -312,13 +322,43 @@ fun PlansScreen() {
                     .padding(20.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text("📭", fontSize = 32.sp)
-                    Text("No active plan", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Text("Select a plan from the list below", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, textAlign = TextAlign.Center)
+                if (checking) {
+                    // Fetching from pastebin right now
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp),
+                            strokeWidth = 3.dp
+                        )
+                        Text("Checking approval…", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, textAlign = TextAlign.Center)
+                    }
+                } else {
+                    // Check finished — still not approved
+                    var recheckTick by remember { mutableStateOf(0) }
+                    LaunchedEffect(recheckTick) {
+                        if (recheckTick > 0) {
+                            runCatching { ApprovalGate.evaluate(ctx, force = true) }
+                        }
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("📭", fontSize = 32.sp)
+                        Text("No active plan", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text("Add your device key to the approval list, then tap Refresh.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(4.dp))
+                        Button(
+                            onClick = { recheckTick++ },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("🔄 Refresh", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                 }
             }
         }
