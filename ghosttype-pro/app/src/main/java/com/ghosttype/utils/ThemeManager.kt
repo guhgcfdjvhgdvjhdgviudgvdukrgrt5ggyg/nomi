@@ -78,6 +78,16 @@ object ThemeManager {
             suggestionBg = Color.parseColor("#F5F5F5"),
             pressedKey   = Color.parseColor("#E0E0E0"),
             accent       = Color.parseColor("#2196F3")
+        ),
+        KeyboardTheme(
+            id = "black_white",
+            name = "⬛ Black & White",
+            keyboardBg   = Color.parseColor("#000000"),
+            keyBg        = Color.parseColor("#FFFFFF"),
+            keyText      = Color.parseColor("#000000"),
+            suggestionBg = Color.parseColor("#1A1A1A"),
+            pressedKey   = Color.parseColor("#CCCCCC"),
+            accent       = Color.parseColor("#FFFFFF")
         )
     )
 
