@@ -91,6 +91,20 @@ class GhostTypeApp : Application() {
         // overwriting the user's later customisations.
         runCatching { applyDefaultsOnFirstRun() }
 
+        // v1.11 — migrate mathCount default from 1 → 3 for existing installs
+        runCatching {
+            val prefs = com.ghosttype.utils.SettingsStore.prefs(this)
+            if (!prefs.getBoolean("math_migrated_v1", false)) {
+                val cur = prefs.getInt(com.ghosttype.utils.SettingsStore.KEY_MATH_COUNT, 3)
+                if (cur <= 1) {
+                    prefs.edit()
+                        .putInt(com.ghosttype.utils.SettingsStore.KEY_MATH_COUNT, 3)
+                        .apply()
+                }
+                prefs.edit().putBoolean("math_migrated_v1", true).apply()
+            }
+        }
+
         // Always-on clipboard history capture. The Application stays alive while
         // ANY of our components (IME, accessibility service, foreground service,
         // activity) is running, which together keep the listener active much longer
@@ -159,6 +173,7 @@ class GhostTypeApp : Application() {
             .putInt(com.ghosttype.utils.SettingsStore.KEY_KEY_HEIGHT_DP, 58)
             .putInt(com.ghosttype.utils.SettingsStore.KEY_KEY_MARGIN_DP, 3)
             .putBoolean(com.ghosttype.utils.SettingsStore.KEY_KEY_3D_SHADOW, true)
+            .putInt(com.ghosttype.utils.SettingsStore.KEY_MATH_COUNT, 3)
             .putBoolean(DEFAULTS_KEY, true)
             .apply()
     }
