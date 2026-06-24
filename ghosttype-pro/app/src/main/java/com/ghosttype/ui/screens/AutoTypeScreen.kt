@@ -204,9 +204,14 @@ fun AutoTypeScreen(
         // CARD 2 — Auto-Type Controls
         // ══════════════════════════════════════════════════════
         SectionCard {
+            val hasMsgs = state.total > 0
             val total = state.total.coerceAtLeast(1)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Message ${state.current} of ${state.total}", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(
+                    if (hasMsgs) "Message ${state.current} of ${state.total}"
+                    else "No messages loaded",
+                    color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold, fontSize = 14.sp
+                )
                 if (state.running) {
                     Text(
                         if (state.paused) "PAUSED" else "RUNNING",
@@ -215,12 +220,14 @@ fun AutoTypeScreen(
                     )
                 }
             }
-            LinearProgressIndicator(
-                progress = { (state.current.toFloat() / total).coerceIn(0f, 1f) },
-                color = Orange,
-                trackColor = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp))
-            )
+            if (hasMsgs) {
+                LinearProgressIndicator(
+                    progress = { (state.current.toFloat() / total).coerceIn(0f, 1f) },
+                    color = Orange,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp))
+                )
+            }
             if (state.currentLine.isNotEmpty()) {
                 Text("> ${state.currentLine}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
             }
@@ -230,7 +237,7 @@ fun AutoTypeScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = onStart,
-                    enabled = !state.running,
+                    enabled = !state.running && hasMsgs,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Orange, contentColor = Color.Black,
