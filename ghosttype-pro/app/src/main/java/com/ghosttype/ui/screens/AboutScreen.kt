@@ -45,7 +45,7 @@ fun AboutScreen() {
     val waChannel   = remember { Obf.decode(ctx, ObfConstants.WA_CHANNEL_URL) }
     val waCommunity = remember { Obf.decode(ctx, ObfConstants.WA_COMMUNITY_URL) }
     val licenseLine = remember { Obf.decode(ctx, ObfConstants.LICENSE_LINE).ifBlank { "NOMI TRICKER · NOMI Team. All rights reserved." } }
-    val youtubeUrl  = "https://www.youtube.com/@chandtricker"
+    val youtubeUrl  = ""
 
     Column(
         modifier = Modifier
@@ -214,37 +214,15 @@ fun AboutScreen() {
             onClick       = { openUrl(ctx, waChannel.ifBlank { "https://whatsapp.com" }) }
         )
 
-        // WhatsApp Community
-        SocialCard(
-            icon          = painterResource(R.drawable.ic_whatsapp),
-            platformName  = "WhatsApp Community",
-            handle        = "@NOMI Team",
-            badgeText     = "COMMUNITY",
-            accentColor   = Color(0xFF128C7E),
-            darkAccent    = Color(0xFF075E54),
-            onClick       = { openUrl(ctx, waCommunity.ifBlank { "https://whatsapp.com" }) }
-        )
-
         // Instagram
         SocialCard(
             icon          = painterResource(R.drawable.ic_instagram),
             platformName  = "Instagram",
-            handle        = "@chand.tricker",
+            handle        = "@syed_nomi_kashmiri",
             badgeText     = "FOLLOW",
             accentColor   = Color(0xFFE1306C),
             darkAccent    = Color(0xFF833AB4),
             onClick       = { openUrl(ctx, instaUrl.ifBlank { "https://instagram.com" }) }
-        )
-
-        // YouTube
-        SocialCard(
-            icon          = painterResource(R.drawable.ic_youtube),
-            platformName  = "YouTube",
-            handle        = "@chandtricker",
-            badgeText     = "SUBSCRIBE",
-            accentColor   = Color(0xFFFF0000),
-            darkAccent    = Color(0xFFCC0000),
-            onClick       = { openUrl(ctx, youtubeUrl) }
         )
 
         // ── Legal ──────────────────────────────────────────────
