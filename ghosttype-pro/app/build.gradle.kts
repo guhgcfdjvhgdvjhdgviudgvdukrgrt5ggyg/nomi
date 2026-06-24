@@ -106,10 +106,11 @@ val generateObfConstants = tasks.register("generateObfConstants") {
         val requiredKeys = listOf(
             "APPROVAL_URL", "CRASH_URL", "UPDATE_URL",
             "WHATSAPP_NUMBER", "OWNER_NAME", "OWNER_TEAM",
-            "INSTAGRAM_URL", "WA_CHANNEL_URL", "WA_COMMUNITY_URL",
-            "TELEGRAM_URL", "LICENSE_LINE", "SPACE_LABEL",
+            "INSTAGRAM_URL", "WA_CHANNEL_URL",
+            "LICENSE_LINE", "SPACE_LABEL",
             "PASTEBIN_HMAC_SALT"
         )
+        val optionalKeys = listOf("WA_COMMUNITY_URL", "TELEGRAM_URL")
         val missing = requiredKeys.filter { secrets.getProperty(it).isNullOrBlank() }
         if (missing.isNotEmpty()) {
             throw GradleException("Missing required secrets in secrets.properties: $missing")
