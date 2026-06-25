@@ -10,26 +10,26 @@ import androidx.compose.ui.platform.LocalContext
 import com.nomitype.utils.SettingsStore
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFFFF8C00),
+    primary = Color.White,
     onPrimary = Color.Black,
     background = Color(0xFF0D0D0D),
     onBackground = Color.White,
     surface = Color(0xFF1F1F1F),
     onSurface = Color.White,
-    secondary = Color(0xFFFFB347),
+    secondary = Color(0xFFB0B0B0),
     surfaceContainerLow = Color(0xFF161616),
     surfaceContainer = Color(0xFF1A1A1A),
     surfaceContainerHigh = Color(0xFF222222)
 )
 
 private val LightColors = lightColorScheme(
-    primary = Color(0xFFFF8C00),
+    primary = Color.Black,
     onPrimary = Color.White,
     background = Color(0xFFF5F5F5),
     onBackground = Color(0xFF1A1A1A),
     surface = Color(0xFFFFFFFF),
     onSurface = Color(0xFF1A1A1A),
-    secondary = Color(0xFFCC6600),
+    secondary = Color(0xFF666666),
     surfaceContainerLow = Color(0xFFEFEFEF),
     surfaceContainer = Color(0xFFE8E8E8),
     surfaceContainerHigh = Color(0xFFDDDDDD)
