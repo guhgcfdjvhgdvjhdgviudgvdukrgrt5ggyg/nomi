@@ -14,11 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import coil.compose.SubcomposeAsyncImage
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,8 +27,6 @@ private val Orange  = Color(0xFFFF8C00)
 
 @Composable
 fun DeveloperScreen() {
-    val ctx = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,21 +65,11 @@ fun DeveloperScreen() {
                         .border(2.5.dp, Orange.copy(alpha = 0.6f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    SubcomposeAsyncImage(
-                        model = "https://cdn.jsdelivr.net/gh/chanddark/Image1/images/icon.png",
-                        contentDescription = "NOMI TRICKER logo",
+                    Image(
+                        painter = painterResource(com.ghosttype.R.drawable.ic_nomi_spider),
+                        contentDescription = "NOMI SPIDER logo",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(CircleShape),
-                        loading = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("CT", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, fontFamily = FontFamily.Default)
-                            }
-                        },
-                        error = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("CT", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, fontFamily = FontFamily.Default)
-                            }
-                        }
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
                     )
                 }
 

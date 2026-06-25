@@ -69,16 +69,20 @@ fun AboutScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Ghost icon
+                // App logo
                 Box(
                     modifier = Modifier
                         .size(76.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Orange.copy(alpha = 0.12f))
                         .border(2.dp, Orange.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👻", fontSize = 36.sp)
+                    Image(
+                        painter = painterResource(R.drawable.ic_nomi_spider),
+                        contentDescription = "App Logo",
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(20.dp))
+                    )
                 }
 
                 Text(
@@ -125,15 +129,14 @@ fun AboutScreen() {
                     modifier = Modifier
                         .size(52.dp)
                         .clip(CircleShape)
-                        .background(Orange.copy(alpha = 0.18f))
                         .border(2.dp, Orange.copy(alpha = 0.5f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        ownerName.take(1).uppercase(),
-                        color = Orange,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp
+                    Image(
+                        painter = painterResource(R.drawable.ic_nomi_spider),
+                        contentDescription = "Developer Logo",
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
                     )
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
