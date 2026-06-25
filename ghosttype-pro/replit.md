@@ -4,13 +4,13 @@ Native Android keyboard app (IME) built with Kotlin + Jetpack Compose for the
 settings UI and a custom `View`-based key grid for the keyboard surface.
 
 ## Module layout
-- `app/src/main/java/com/ghosttype/ime/` — IME service, key view, auto-typer,
+- `app/src/main/java/com/nomitype/ime/` — IME service, key view, auto-typer,
   accessibility helper.
-- `app/src/main/java/com/ghosttype/ui/` — Compose Material3 settings app,
+- `app/src/main/java/com/nomitype/ui/` — Compose Material3 settings app,
   per-screen files in `ui/screens/`.
-- `app/src/main/java/com/ghosttype/utils/` — themes, fonts, clipboard watcher,
+- `app/src/main/java/com/nomitype/utils/` — themes, fonts, clipboard watcher,
   prefs store.
-- `app/src/main/java/com/ghosttype/data/db/` — Room DB (clipboard items,
+- `app/src/main/java/com/nomitype/data/db/` — Room DB (clipboard items,
   saved sentences).
 - `app/src/main/assets/fonts/` — bundled `.ttf` files for the built-in font
   picker (loaded by `BuiltInFonts.kt`).
@@ -74,9 +74,9 @@ Implements `SECURITY_AND_APPROVAL_PROMPT.txt` end-to-end. Two pillars:
 re-distributed, and **(B) device-ID gate** so only Android IDs on the
 developer's GitHub-hosted `Users.json` can use the keyboard.
 
-### New module: `com.ghosttype.security`
+### New module: `com.nomitype.security`
 - **`Obf.kt`** — runtime XOR/Base64 decryption of the obfuscated
-  string blobs. The XOR key is `SHA-256("ghosttype_obf_v1::" + pkg +
+  string blobs. The XOR key is `SHA-256("nomitype_obf_v1::" + pkg +
   "::" + signingCertSha)` so a repackaged APK (different cert) derives
   a different key → every `Obf.decode(...)` returns garbage. Skips
   decryption in dev builds (`IS_OBFUSCATED == false`).
@@ -91,7 +91,7 @@ developer's GitHub-hosted `Users.json` can use the keyboard.
   prevents one approval from covering multiple devices).
 - **`ApprovalGate.kt`** — fetches the JSON via OkHttp, parses
   `approved` / `blocked` arrays (`{"android_id": "...", "name": "..."}`),
-  caches the verdict in regular `SharedPreferences("ghosttype_gate")`.
+  caches the verdict in regular `SharedPreferences("nomitype_gate")`.
   Network rules: at most one fetch per 6 h; on Approved cache the
   network is skipped entirely; on failure falls back to cache up to 7
   days old; `blocked` always wins over `approved`. Exposes
@@ -133,7 +133,7 @@ developer's GitHub-hosted `Users.json` can use the keyboard.
   reads the configured release keystore via `java.security.KeyStore`,
   computes its cert SHA-256, derives the XOR key, encrypts every
   branded string, and writes
-  `build/generated/source/obf/com/ghosttype/security/ObfConstants.kt`
+  `build/generated/source/obf/com/nomitype/security/ObfConstants.kt`
   before each Kotlin compile. The generated file's source dir is
   added to the main source set. Also enabled `isMinifyEnabled = true`
   and `isShrinkResources = true` on the release variant. Added

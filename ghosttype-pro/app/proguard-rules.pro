@@ -16,32 +16,32 @@
 -allowaccessmodification
 
 # ===== Manifest entry points (loaded by name) =====
--keep class com.ghosttype.ime.GhostTypeIMEService { *; }
--keep class com.ghosttype.ime.GhostTypeAccessibilityService { *; }
--keep class com.ghosttype.ime.AutoTypeForegroundService { *; }
--keep class com.ghosttype.ime.FloatingPointerService { *; }
--keep class com.ghosttype.utils.BootReceiver { *; }
--keep class com.ghosttype.ui.MainActivity { *; }
--keep class com.ghosttype.GhostTypeApp { *; }
+-keep class com.nomitype.ime.GhostTypeIMEService { *; }
+-keep class com.nomitype.ime.GhostTypeAccessibilityService { *; }
+-keep class com.nomitype.ime.AutoTypeForegroundService { *; }
+-keep class com.nomitype.ime.FloatingPointerService { *; }
+-keep class com.nomitype.utils.BootReceiver { *; }
+-keep class com.nomitype.ui.MainActivity { *; }
+-keep class com.nomitype.GhostTypeApp { *; }
 
 # ===== Security module =====
 # ObfConstants is generated at build time and accessed by name from
 # the keep'd Obf object — keep both intact so signature pinning + URL
 # decryption still works after R8 obfuscation.
--keep class com.ghosttype.security.ObfConstants { *; }
--keep class com.ghosttype.security.Obf { public static *; }
--keep class com.ghosttype.security.SecurityGuard { public static *; }
--keep class com.ghosttype.security.ApprovalGate { public *; }
--keep class com.ghosttype.security.ApprovalGate$State { *; }
--keep class com.ghosttype.security.ApprovalGate$State$* { *; }
+-keep class com.nomitype.security.ObfConstants { *; }
+-keep class com.nomitype.security.Obf { public static *; }
+-keep class com.nomitype.security.SecurityGuard { public static *; }
+-keep class com.nomitype.security.ApprovalGate { public *; }
+-keep class com.nomitype.security.ApprovalGate$State { *; }
+-keep class com.nomitype.security.ApprovalGate$State$* { *; }
 
 # NativeGuard — JNI bridge must NOT be renamed/obfuscated or the
-# native C++ function names won't match the Java_com_ghosttype_*
+# native C++ function names won't match the Java_com_nomitype_*
 # JNI naming convention.
--keep class com.ghosttype.security.NativeGuard { *; }
+-keep class com.nomitype.security.NativeGuard { *; }
 
 # ===== Room (uses reflection on entities + DAOs) =====
--keep class com.ghosttype.data.db.** { *; }
+-keep class com.nomitype.data.db.** { *; }
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep @androidx.room.Entity class * { *; }
 -keep @androidx.room.Dao class * { *; }
