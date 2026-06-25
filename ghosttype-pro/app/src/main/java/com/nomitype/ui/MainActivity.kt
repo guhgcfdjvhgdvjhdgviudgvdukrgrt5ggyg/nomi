@@ -20,8 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.nomitype.ime.AutoTypeEngine
 import com.nomitype.ime.AutoTypeForegroundService
@@ -389,6 +394,27 @@ fun AppRoot(
                         titleContentColor = MaterialTheme.colorScheme.primary
                     )
                 )
+            },
+            bottomBar = {
+                val orange = Color(0xFFFF8C00)
+                val year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+                Surface(
+                    color = MaterialTheme.colorScheme.background,
+                    tonalElevation = 0.dp
+                ) {
+                    Text(
+                        buildAnnotatedString {
+                            append("© $year NOMI TRICKER. All rights reserved.  ")
+                            withStyle(SpanStyle(color = orange, fontWeight = FontWeight.ExtraBold)) {
+                                append("CHAND TRICKER")
+                            }
+                        },
+                        fontSize = 10.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                        color = Color(0xFF666666)
+                    )
+                }
             }
         ) { padding ->
             Box(

@@ -233,24 +233,9 @@ fun AboutScreen() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(bottom = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HorizontalDivider(color = DarkBorder, thickness = 0.5.dp)
-            Spacer(Modifier.height(8.dp))
-            val year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
-            val orange = Color(0xFFFF8C00)
-            Text(
-                buildAnnotatedString {
-                    append("© $year $licenseLine ")
-                    withStyle(SpanStyle(color = orange, fontWeight = FontWeight.ExtraBold)) {
-                        append("CHAND TRICKER")
-                    }
-                },
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center
-            )
             Text(
                 "Does not collect or transmit typing data",
                 color = Color(0xFF444444),
