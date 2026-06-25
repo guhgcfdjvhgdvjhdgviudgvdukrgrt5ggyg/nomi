@@ -21,23 +21,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.nomitype.security.Obf
+import com.nomitype.security.ObfConstants
 import com.nomitype.utils.SettingsStore
 
 private val Orange      = Color(0xFFFF8C00)
 private val GreenWa     = Color(0xFF25D366)
 private val GreenWaDark = Color(0xFF128C7E)
-private val RedYt       = Color(0xFFFF0000)
-private val RedYtDark   = Color(0xFFCC0000)
+private val PinkIg      = Color(0xFFE4405F)
+private val PinkIgDark  = Color(0xFFC13584)
 
 @Composable
 fun TasksDialog(onUnlocked: () -> Unit) {
     val ctx   = LocalContext.current
     val prefs = SettingsStore.prefs(ctx)
 
-    var waJoined by remember { mutableStateOf(false) }
-    var ytJoined by remember { mutableStateOf(false) }
+    val waUrl   = remember { Obf.decode(ctx, ObfConstants.WA_CHANNEL_URL) }
+    val instaUrl = remember { Obf.decode(ctx, ObfConstants.INSTAGRAM_URL) }
 
-    val bothDone = waJoined && ytJoined
+    var waJoined  by remember { mutableStateOf(false) }
+    var igJoined  by remember { mutableStateOf(false) }
+
+    val bothDone = waJoined && igJoined
 
     Dialog(
         onDismissRequest = {},
@@ -191,7 +196,7 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                                         try {
                                             ctx.startActivity(
                                                 Intent(Intent.ACTION_VIEW,
-                                                    Uri.parse("https://whatsapp.com/channel/0029VaZrEGYIN9ih4PxcFQ33"))
+                                                    Uri.parse(waUrl))
                                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                             )
                                         } catch (_: Exception) {}
@@ -212,22 +217,22 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                     }
                 }
 
-                // ── YouTube Task Card ──────────────────────────
+                // ── Instagram Task Card ─────────────────────────
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(RedYt.copy(alpha = if (ytJoined) 0.18f else 0.09f),
-                                       RedYtDark.copy(alpha = if (ytJoined) 0.12f else 0.05f))
+                                listOf(PinkIg.copy(alpha = if (igJoined) 0.18f else 0.09f),
+                                       PinkIgDark.copy(alpha = if (igJoined) 0.12f else 0.05f))
                             )
                         )
                         .border(
                             1.5.dp,
                             Brush.horizontalGradient(
-                                listOf(RedYt.copy(alpha = if (ytJoined) 0.7f else 0.35f),
-                                       RedYtDark.copy(alpha = if (ytJoined) 0.4f else 0.2f))
+                                listOf(PinkIg.copy(alpha = if (igJoined) 0.7f else 0.35f),
+                                       PinkIgDark.copy(alpha = if (igJoined) 0.4f else 0.2f))
                             ),
                             RoundedCornerShape(18.dp)
                         )
@@ -244,36 +249,36 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(
                                     Brush.verticalGradient(
-                                        listOf(RedYt.copy(alpha = 0.30f), RedYtDark.copy(alpha = 0.20f))
+                                        listOf(PinkIg.copy(alpha = 0.30f), PinkIgDark.copy(alpha = 0.20f))
                                     )
                                 )
                                 .border(
                                     1.dp,
-                                    Brush.verticalGradient(listOf(RedYt.copy(alpha = 0.7f), RedYtDark.copy(alpha = 0.4f))),
+                                    Brush.verticalGradient(listOf(PinkIg.copy(alpha = 0.7f), PinkIgDark.copy(alpha = 0.4f))),
                                     RoundedCornerShape(14.dp)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(if (ytJoined) "✅" else "▶️", fontSize = 26.sp)
+                            Text(if (igJoined) "✅" else "📸", fontSize = 26.sp)
                         }
 
                         // Text
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             Text(
-                                "Subscribe on YouTube",
-                                color = RedYt,
+                                "Follow on Instagram",
+                                color = PinkIg,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 15.sp
                             )
                             Text(
-                                "@chandtricker",
+                                "@syed_nomi_kashmiri",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp
                             )
-                            AnimatedVisibility(visible = ytJoined) {
+                            AnimatedVisibility(visible = igJoined) {
                                 Text(
-                                    "✓ Subscribed successfully",
-                                    color = RedYt,
+                                    "✓ Followed successfully",
+                                    color = PinkIg,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -281,17 +286,17 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                         }
 
                         // Button
-                        AnimatedContent(targetState = ytJoined, label = "yt_btn") { joined ->
+                        AnimatedContent(targetState = igJoined, label = "ig_btn") { joined ->
                             if (joined) {
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(10.dp))
-                                        .background(RedYt.copy(alpha = 0.15f))
-                                        .border(1.dp, RedYt.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+                                        .background(PinkIg.copy(alpha = 0.15f))
+                                        .border(1.dp, PinkIg.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
                                         .padding(horizontal = 12.dp, vertical = 8.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("Done ✓", color = RedYt, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
+                                    Text("Done ✓", color = PinkIg, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
                                 }
                             } else {
                                 Button(
@@ -299,21 +304,21 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                                         try {
                                             ctx.startActivity(
                                                 Intent(Intent.ACTION_VIEW,
-                                                    Uri.parse("https://www.youtube.com/@chandtricker"))
+                                                    Uri.parse(instaUrl))
                                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                             )
                                         } catch (_: Exception) {}
-                                        ytJoined = true
+                                        igJoined = true
                                     },
                                     shape = RoundedCornerShape(10.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = RedYt,
+                                        containerColor = PinkIg,
                                         contentColor = Color.White
                                     ),
                                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                     modifier = Modifier.height(36.dp)
                                 ) {
-                                    Text("Subscribe", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                                    Text("Follow", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
                                 }
                             }
                         }
@@ -352,9 +357,9 @@ fun TasksDialog(onUnlocked: () -> Unit) {
                 AnimatedVisibility(visible = !bothDone) {
                     Text(
                         when {
-                            !waJoined && !ytJoined -> "Join WhatsApp and subscribe on YouTube to unlock"
+                            !waJoined && !igJoined -> "Join WhatsApp and follow on Instagram to unlock"
                             !waJoined -> "Join WhatsApp channel to unlock"
-                            else -> "Subscribe on YouTube to unlock"
+                            else -> "Follow on Instagram to unlock"
                         },
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         fontSize = 11.sp,
