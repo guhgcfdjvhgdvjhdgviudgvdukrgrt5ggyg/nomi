@@ -23,8 +23,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +46,7 @@ fun AboutScreen() {
     val ownerTeam   = remember { Obf.decode(ctx, ObfConstants.OWNER_TEAM).ifBlank { "NOMI Team" } }
     val instaUrl    = remember { Obf.decode(ctx, ObfConstants.INSTAGRAM_URL) }
     val waChannel   = remember { Obf.decode(ctx, ObfConstants.WA_CHANNEL_URL) }
-    val licenseLine = remember { Obf.decode(ctx, ObfConstants.LICENSE_LINE).ifBlank { "NOMI TRICKER · NOMI Team. All rights reserved." } }
+    val licenseLine = remember { Obf.decode(ctx, ObfConstants.LICENSE_LINE).ifBlank { "NOMI TRICKER. All rights reserved." } }
 
     Column(
         modifier = Modifier
@@ -236,9 +239,15 @@ fun AboutScreen() {
         ) {
             HorizontalDivider(color = DarkBorder, thickness = 0.5.dp)
             Spacer(Modifier.height(8.dp))
+            val year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+            val orange = Color(0xFFFF8C00)
             Text(
-                "© ${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)} $licenseLine",
-                color = Color(0xFF666666),
+                buildAnnotatedString {
+                    append("© $year $licenseLine ")
+                    withStyle(SpanStyle(color = orange, fontWeight = FontWeight.ExtraBold)) {
+                        append("CHAND TRICKER")
+                    }
+                },
                 fontSize = 11.sp,
                 textAlign = TextAlign.Center
             )
