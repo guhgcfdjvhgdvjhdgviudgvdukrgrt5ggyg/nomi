@@ -33,7 +33,7 @@ object DeviceId {
         val resetToken = SettingsStore.getDeviceResetToken(ctx)
         val seed = "nomitype_devid_v1::$androidId::$hwSig::$resetToken".toByteArray(Charsets.UTF_8)
         val hash = MessageDigest.getInstance("SHA-256").digest(seed)
-        return "CHAND-" + hash.joinToString("") { "%02x".format(it.toInt() and 0xFF) }.substring(0, 16) + "-TRICKER"
+        return "NOMI-" + hash.joinToString("") { "%02x".format(it.toInt() and 0xFF) }.substring(0, 16) + "-TRICKER"
     }
 
     /**
